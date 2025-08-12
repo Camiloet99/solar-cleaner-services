@@ -1,28 +1,40 @@
 package org.solar.mainservice.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.solar.mainservice.model.TelemetryReading;
 import org.solar.mainservice.repository.TelemetryRepository;
 import org.solar.mainservice.websocket.WebSocketNotifier;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TelemetryService {
-
-    private final TelemetryRepository repository;
-    private final AiServiceClient aiService;
-    private final WebSocketNotifier notifier;
+    private final TelemetryRepository repo;
+    private final AiServiceClient ai;
+    private final WebSocketNotifier ws;
 
     public Mono<Void> processReading(TelemetryReading reading) {
-        return repository.save(reading)
-                .flatMap(saved -> repository.findTop10BySessionIdOrderByTimestampDesc(saved.getSessionId())
-                        .collectList()
-                        .filter(list -> list.size() == 10)
-                        .flatMap(aiService::sendToAi)
-                        .flatMap(notifier::notifyFrontend)
-                        .then())
+        return repo.save(reading)
+                .doOnNext(saved -> log.info("Saved reading id={}, sessionId={}, dustLevel={}, powerOutput={}",
+                        saved.getId(), saved.getSessionId(), saved.getDustLevel(), saved.getPowerOutput()))
+                .doOnNext(ws::sendTelemetry)
+                .doOnNext(saved -> triggerPrediction(saved.getSessionId()))
                 .then();
     }
+
+
+    private void triggerPrediction(String sessionId) {
+        repo.findTop10BySessionIdOrderByTimestampDesc(sessionId)
+                .collectList()
+                .filter(list -> list.size() == 10)
+                .flatMap(ai::sendToAi)
+                .doOnNext(ws::sendPrediction)
+                .doOnError(e -> log.warn("Prediction skipped: {}", e.toString()))
+                .onErrorResume(e -> Mono.empty())
+                .subscribe(); // ← separa del request, no bloquea ni propaga
+    }
 }
+

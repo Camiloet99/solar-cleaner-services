@@ -1,7 +1,15 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://localhost:27017/telemetrydb
-
+      uri: mongodb://root:secret@127.0.0.1:27017/telemetrydb?authSource=admin
 server:
   port: 8080
+
+app:
+  cors:
+    allowed-origins: http://localhost:5173,http://127.0.0.1:5173
+
+ai:
+  enabled: false
+  base-url: http://localhost:5001   # cuando lo tengas
+  timeout-ms: 2000

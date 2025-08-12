@@ -8,28 +8,41 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
-@Data
-@Document(collection = "readings")
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+@Data @NoArgsConstructor @AllArgsConstructor
+@Document("telemetry_readings")
 public class TelemetryReading {
     @Id
     private String id;
+
     private String sessionId;
     private String panelId;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime timestamp;
-    private double temperature;
-    private double humidity;
-    private double dustLevel;
-    private double powerOutput;
-    private double vibration;
-    private double microFractureRisk;
+
+    private Double temperature;
+    private Double humidity;
+
+    @JsonAlias({"dust","dust_level","dustLevel"})
+    private Double dustLevel;
+
+    @JsonAlias({"power","power_output","powerOutput"})
+    private Double powerOutput;
+
+    private Double vibration;
+
+    @JsonAlias({"micro_fracture_risk","microFractureRisk"})
+    private Double microFractureRisk;
+
     private GeoLocation location;
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
+    @Data @NoArgsConstructor @AllArgsConstructor
     public static class GeoLocation {
-        private double lat;
-        private double lng;
+        private Double lat;
+        private Double lng;
     }
 }
 
