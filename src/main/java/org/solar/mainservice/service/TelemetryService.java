@@ -18,13 +18,11 @@ public class TelemetryService {
 
     public Mono<Void> processReading(TelemetryReading reading) {
         return repo.save(reading)
-                .doOnNext(saved -> log.info("Saved reading id={}, sessionId={}, dustLevel={}, powerOutput={}",
-                        saved.getId(), saved.getSessionId(), saved.getDustLevel(), saved.getPowerOutput()))
+                .doOnNext(saved -> log.info("Saved {}", saved))
                 .doOnNext(ws::sendTelemetry)
                 .doOnNext(saved -> triggerPrediction(saved.getSessionId()))
                 .then();
     }
-
 
     private void triggerPrediction(String sessionId) {
         repo.findTop10BySessionIdOrderByTimestampDesc(sessionId)
@@ -34,7 +32,7 @@ public class TelemetryService {
                 .doOnNext(ws::sendPrediction)
                 .doOnError(e -> log.warn("Prediction skipped: {}", e.toString()))
                 .onErrorResume(e -> Mono.empty())
-                .subscribe(); // ← separa del request, no bloquea ni propaga
+                .subscribe();
     }
 }
 

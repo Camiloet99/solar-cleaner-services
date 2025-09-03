@@ -21,7 +21,6 @@ public class TelemetryController {
     public Mono<Void> receive(@RequestBody TelemetryReading reading) {
         return telemetryService.processReading(reading)
                 .onErrorResume(e -> {
-                    // si fallara el save en Mongo, loguea y evita 500 durante pruebas
                     log.error("Error saving telemetry", e);
                     return Mono.empty();
                 });

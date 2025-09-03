@@ -20,6 +20,9 @@ public class TelemetryReading {
     private String sessionId;
     private String panelId;
 
+    private State state;
+    private Params params;
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime timestamp;
 
@@ -43,6 +46,31 @@ public class TelemetryReading {
     public static class GeoLocation {
         private Double lat;
         private Double lng;
+    }
+
+    @Data @NoArgsConstructor @AllArgsConstructor
+    public static class State {
+        private String mode;
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
+        private LocalDateTime lastChangeTs;
+        private String cause;
+    }
+
+    @Data @NoArgsConstructor @AllArgsConstructor
+    public static class Params {
+        private Double robotSpeed;
+        private Double brushRpm;
+        private Double waterPressure;
+        private Double detergentFlowRate;
+        private Double vacuumPower;
+        private Double turnRadius;
+        private Double passOverlap;
+        private Double pathSpacing;
+        private Double squeegeePressure;
+        private Double dwellTime;
+        private Double rpmRampRate;
+        private Double maxWaterPerMin;
+        private Double maxEnergyPerMin;
     }
 }
 
