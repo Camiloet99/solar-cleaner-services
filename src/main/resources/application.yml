@@ -9,7 +9,23 @@ app:
   cors:
     allowed-origins: http://localhost:5173,http://127.0.0.1:5173
 
+simulator:
+  control-url: http://localhost:7072/commands
+
 ai:
-  enabled: false
-  base-url: http://localhost:5001   # cuando lo tengas
+  enabled: true
+  base-url: http://localhost:5001
   timeout-ms: 2000
+  apply-control: true
+
+control:
+  limits:
+    rpmMin: 300
+    rpmMax: 1500
+    flowMin: 0.0
+    flowMax: 1.8     # ajusta al máximo del sim
+    pressMin: 0.0
+    pressMax: 3.2
+    detPctMax: 0.05  # si tu simulador acepta 0..1 como fracción, sube el tope
+    maxDeltaRpm: 120 # suaviza pero permite cambios visibles
+

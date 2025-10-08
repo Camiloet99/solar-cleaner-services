@@ -83,9 +83,9 @@ public class WebSocketNotifier {
                     getOrNull(r::getTemperature),
                     getOrNull(r::getHumidity),
                     getOrNull(r::getDustLevel),
-                    getOrNull(r::getPowerOutput),
-                    getOrNull(r::getVibration),
-                    getOrNull(r::getMicroFractureRisk),
+                    getOrNull(r::getVibration),          // <- aquí va vibration
+                    getOrNull(r::getMicroFractureRisk),  // <- aquí microFractureRisk
+                    getOrNull(r::getPowerOutput),        // <- y aquí powerOutput
                     g, st, ps
             );
         }

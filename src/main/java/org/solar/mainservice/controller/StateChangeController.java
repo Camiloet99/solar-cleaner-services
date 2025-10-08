@@ -3,6 +3,7 @@ package org.solar.mainservice.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.solar.mainservice.dto.StateChangeEventDTO;
+import org.solar.mainservice.service.SimulatorRelay;
 import org.solar.mainservice.websocket.WebSocketNotifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import java.util.Set;
 public class StateChangeController {
 
     private final WebSocketNotifier ws;
+    private final SimulatorRelay relay;
 
     @PostMapping
     public Mono<ResponseEntity<?>> ingest(@RequestBody StateChangeEventDTO evt) {
@@ -30,8 +32,13 @@ public class StateChangeController {
                     .body(Map.of("ok", false, "error", "invalid type")));
         }
 
+        // Notificar a los clientes (dashboard)
         ws.sendRuntimeEvent(evt.getType(), evt, evt.getSessionId(), evt.getPanelId());
 
-        return Mono.just(ResponseEntity.ok(Map.of("ok", true)));
+        // Reenviar al simulador
+        return relay.relay(evt)
+                .doOnNext(r -> log.info("Relayed to simulator: {}", r))
+                .map(r -> ResponseEntity.ok(Map.of("ok", true, "relay", r)));
     }
 }
+
